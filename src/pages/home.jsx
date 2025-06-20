@@ -11,10 +11,3 @@ function Home() {
  );
 }
 export default Home
-useEffect(() => {
-const fetch = async () => {
-const datos = await getUserData(user.uid);
-setUserData(datos);
-};
-if (user) fetch();
-}, [user]);

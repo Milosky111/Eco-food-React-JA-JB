@@ -1,6 +1,5 @@
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "./firebase";
-import { getUserData } from "../services/userService";
 /**
 * Obtiene los datos del usuario desde Firestore
 * @param {string} uid - ID del usuario (auth.uid)
@@ -31,18 +30,4 @@ await setDoc(doc(db, "usuarios", uid), data);
 console.error("Error al guardar usuario:", error);
 throw error;
 }
-
-const handleLogin = async (e) => {
-e.preventDefault();
-try {
-await setPersistence(auth, browserLocalPersistence);
-const cred = await signInWithEmailAndPassword(auth, email, password);
-const datos = await getUserData(cred.user.uid);
-console.log("Bienvenido", datos.nombre, "Tipo:", datos.tipo);
-navigate("/home");
-// eslint-disable-next-line no-unused-vars
-} catch (error) {
-Swal.fire("Error", "Credenciales incorrectas", "error");
-}
-};
 };
