@@ -17,16 +17,10 @@ export default function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      // Persistencia local para mantener sesión aunque cierre navegador
       await setPersistence(auth, browserLocalPersistence);
-
-      // Intentar iniciar sesión
       const cred = await signInWithEmailAndPassword(auth, email, password);
-
-      // Refrescar usuario para asegurar info actualizada
       await cred.user.reload();
 
-      // Verificar si el correo está confirmado
       if (!cred.user.emailVerified) {
         await signOut(auth);
         return Swal.fire(
@@ -82,6 +76,9 @@ export default function Login() {
           Iniciar Sesión
         </button>
       </form>
+      <Link to="/registro" className="btn btn-secondary w-100 mt-2">
+      Registrarse
+      </Link>
       <p className="mt-3 text-center">
         ¿Olvidaste tu contraseña?{" "}
         <Link to="/RecuperarContraseña" style={{ textDecoration: "underline" }}>
