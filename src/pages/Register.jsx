@@ -9,14 +9,13 @@ export default function Register() {
   const [nombre, setNombre] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [tipo, setTipo] = useState("cliente");
   const [direccion, setDireccion] = useState("");
   const [comuna, setComuna] = useState("");
   const [telefono, setTelefono] = useState("");
+  const [tipo] = useState("cliente"); // Fijo como "cliente"
 
   const navigate = useNavigate();
 
-  // Validar contraseña robusta: 8+ caracteres, mayúscula, minúscula, número y símbolo
   const isPasswordRobusta = (pass) => {
     const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
     return regex.test(pass);
@@ -117,19 +116,6 @@ export default function Register() {
             onChange={(e) => setComuna(e.target.value)}
             required
           />
-        </div>
-
-        <div className="mb-3">
-          <label className="form-label">Tipo de usuario</label>
-          <select
-            className="form-select"
-            value={tipo}
-            onChange={(e) => setTipo(e.target.value)}
-          >
-            <option value="cliente">Cliente</option>
-            <option value="empresa">Empresa</option>
-            <option value="admin">Administrador</option>
-          </select>
         </div>
 
         <div className="mb-3">
