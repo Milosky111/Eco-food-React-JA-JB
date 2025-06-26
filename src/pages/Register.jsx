@@ -12,7 +12,7 @@ export default function Register() {
   const [direccion, setDireccion] = useState("");
   const [comuna, setComuna] = useState("");
   const [telefono, setTelefono] = useState("");
-  const [tipo] = useState("cliente"); // Fijo como "cliente"
+  const [tipo] = useState("cliente");
 
   const navigate = useNavigate();
 
@@ -21,8 +21,32 @@ export default function Register() {
     return regex.test(pass);
   };
 
+  const isTelefonoValido = (tel) => {
+    return /^[0-9]{9,15}$/.test(tel); // solo números, entre 9 y 15 dígitos
+  };
+
   const handleRegister = async (e) => {
     e.preventDefault();
+
+    if (nombre.length < 3 || nombre.length > 50) {
+      return Swal.fire("Nombre inválido", "El nombre debe tener entre 3 y 50 caracteres.", "warning");
+    }
+
+    if (email.length < 5 || email.length > 100) {
+      return Swal.fire("Correo inválido", "El correo debe tener entre 5 y 100 caracteres.", "warning");
+    }
+
+    if (direccion.length < 5 || direccion.length > 100) {
+      return Swal.fire("Dirección inválida", "La dirección debe tener entre 5 y 100 caracteres.", "warning");
+    }
+
+    if (comuna.length < 3 || comuna.length > 50) {
+      return Swal.fire("Comuna inválida", "La comuna debe tener entre 3 y 50 caracteres.", "warning");
+    }
+
+    if (telefono && !isTelefonoValido(telefono)) {
+      return Swal.fire("Teléfono inválido", "El teléfono debe contener solo números (mínimo 9, máximo 15 dígitos).", "warning");
+    }
 
     if (!isPasswordRobusta(password)) {
       return Swal.fire(
@@ -70,6 +94,8 @@ export default function Register() {
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
             required
+            minLength={3}
+            maxLength={50}
           />
         </div>
 
@@ -81,6 +107,8 @@ export default function Register() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            minLength={5}
+            maxLength={100}
           />
         </div>
 
@@ -92,6 +120,8 @@ export default function Register() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            minLength={8}
+            maxLength={50}
             placeholder="Mínimo 8 caracteres, mayúscula, número y símbolo"
           />
         </div>
@@ -104,6 +134,8 @@ export default function Register() {
             value={direccion}
             onChange={(e) => setDireccion(e.target.value)}
             required
+            minLength={5}
+            maxLength={70}
           />
         </div>
 
@@ -115,6 +147,8 @@ export default function Register() {
             value={comuna}
             onChange={(e) => setComuna(e.target.value)}
             required
+            minLength={3}
+            maxLength={50}
           />
         </div>
 
@@ -124,8 +158,9 @@ export default function Register() {
             type="tel"
             className="form-control"
             value={telefono}
-            onChange={(e) => setTelefono(e.target.value)}
-            placeholder="+56 9 1234 5678"
+            onChange={(e) => setTelefono(e.target.value.replace(/\D/g, ""))} // elimina caracteres no numéricos
+            placeholder="Ej: 912345678"
+            maxLength={15}
           />
         </div>
 
