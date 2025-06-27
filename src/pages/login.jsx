@@ -17,34 +17,20 @@ export default function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      await setPersistence(auth, browserLocalPersistence);
-      const cred = await signInWithEmailAndPassword(auth, email, password);
-      await cred.user.reload();
-
-      if (!cred.user.emailVerified) {
-        await signOut(auth);
-        return Swal.fire(
-          "Verificación pendiente",
-          "Por favor, verifica tu correo antes de iniciar sesión.",
-          "warning"
-        );
-      }
-
-      Swal.fire("Bienvenido", "Has iniciado sesión correctamente", "success");
-      navigate("/home");
-    } catch (error) {
-      console.error("Error al iniciar sesión:", error.message);
-      Swal.fire(
-        "Error",
-        error.message.includes("user-not-found")
-          ? "Usuario no encontrado."
-          : error.message.includes("wrong-password")
-          ? "Contraseña incorrecta."
-          : "Credenciales incorrectas o fallo de red.",
-        "error"
-      );
+    await setPersistence(auth, browserLocalPersistence);
+    const cred = await signInWithEmailAndPassword(auth, email, password);
+    if (!cred.user.emailVerified) {
+    Swal.fire("Verificación requerida", "Debes verificar tu correo antes de ingresar.", "warning");
+    return;
     }
-  };
+    const datos = await getUserData(cred.user.uid);
+    if (datos.tipo === "admin") navigate("/admin/dashboard");
+    else if (datos.tipo === "cliente") navigate("/cliente/dashboard");
+    // eslint-disable-next-line no-unused-vars
+    } catch (error) {
+    Swal.fire("Error", "Credenciales incorrectas", "error");
+    }
+    };
 
   return (
     <div className="container mt-5" style={{ maxWidth: "400px" }}>
@@ -88,3 +74,21 @@ export default function Login() {
     </div>
   );
 }
+
+const handleLogin = async (e) => {
+  e.preventDefault();
+  try {
+  await setPersistence(auth, browserLocalPersistence);
+  const cred = await signInWithEmailAndPassword(auth, email, password);
+  if (!cred.user.emailVerified) {
+  Swal.fire("Verificación requerida", "Debes verificar tu correo antes de ingresar.", "warning");
+  return;
+  }
+  const datos = await getUserData(cred.user.uid);
+  if (datos.tipo === "admin") navigate("/admin/dashboard");
+  else if (datos.tipo === "cliente") navigate("/cliente/dashboard");
+  // eslint-disable-next-line no-unused-vars
+  } catch (error) {
+  Swal.fire("Error", "Credenciales incorrectas", "error");
+  }
+  };
