@@ -1,25 +1,45 @@
 import { Routes, Route } from "react-router-dom";
-import Login from "../pages/login";
+
+// Páginas públicas
+import Login from "../pages/Login";
 import Register from "../pages/Register";
-import Home from "../pages/home";
-import ProtectedRoute from "./ProtectedRoute";
 import RecuperarContraseña from "../pages/RecuperarContraseña";
+
+// Cliente
+import ClienteDashboard from "../pages/Cliente/ClienteDashboard";
+
+// Admin
+import AdminLayout from "../components/Admin/AdminLayout";
+import AdminDashboard from "../pages/Admin/adminDashboard";
+import AdminEmpresas from "../pages/Admin/Empresas/empresas";
+import AdminClientes from "../pages/Admin/Clientes/AdminClientes";
+import AdminAdministradores from "../pages/Admin/Administradores/administradores";
+
 
 export default function AppRouter() {
   return (
     <Routes>
-      <Route path="/login" element={<Login />} />
+      {/* Páginas públicas */}
       <Route path="/" element={<Login />} />
+      <Route path="/login" element={<Login />} />
       <Route path="/registro" element={<Register />} />
-      <Route path="/RecuperarContraseña" element={<RecuperarContraseña />} />
-      <Route
-        path="/home"
-        element={
-          <ProtectedRoute>
-            <Home />
-          </ProtectedRoute>
-        }
-      />
+      <Route path="/recuperar" element={<RecuperarContraseña />} />
+
+      {/* Cliente */}
+      <Route path="/cliente/dashboard" element={<ClienteDashboard />} />
+
+      {/* Admin con layout y rutas anidadas */}
+      <Route path="/admin" element={<AdminLayout />}>
+        <Route index element={<AdminDashboard />} /> {/* /admin */}
+        <Route path="dashboard" element={<AdminDashboard />} /> {/* /admin/dashboard */}
+        <Route index element={<AdminDashboard />} />
+        <Route path="empresas" element={<AdminEmpresas />} />
+        <Route path="clientes" element={<AdminClientes />} />
+        <Route path="administradores" element={<AdminAdministradores />} />
+      </Route>
+
+      {/* Ruta fallback: si no coincide nada, redirige al login */}
+      <Route path="*" element={<Login />} />
     </Routes>
   );
 }

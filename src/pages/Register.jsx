@@ -22,7 +22,7 @@ export default function Register() {
   };
 
   const isTelefonoValido = (tel) => {
-    return /^[0-9]{9,15}$/.test(tel); // solo números, entre 9 y 15 dígitos
+    return /^[0-9]{9,15}$/.test(tel);
   };
 
   const handleRegister = async (e) => {
@@ -36,8 +36,8 @@ export default function Register() {
       return Swal.fire("Correo inválido", "El correo debe tener entre 5 y 100 caracteres.", "warning");
     }
 
-    if (direccion.length < 5 || direccion.length > 100) {
-      return Swal.fire("Dirección inválida", "La dirección debe tener entre 5 y 100 caracteres.", "warning");
+    if (direccion.length < 5 || direccion.length > 70) {
+      return Swal.fire("Dirección inválida", "La dirección debe tener entre 5 y 70 caracteres.", "warning");
     }
 
     if (comuna.length < 3 || comuna.length > 50) {
@@ -45,20 +45,24 @@ export default function Register() {
     }
 
     if (telefono && !isTelefonoValido(telefono)) {
-      return Swal.fire("Teléfono inválido", "El teléfono debe contener solo números (mínimo 9, máximo 15 dígitos).", "warning");
+      return Swal.fire("Teléfono inválido", "Debe contener solo números (9 a 15 dígitos).", "warning");
     }
 
     if (!isPasswordRobusta(password)) {
       return Swal.fire(
         "Contraseña débil",
-        "La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un símbolo.",
+        "Debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un símbolo.",
         "warning"
       );
     }
 
     try {
+      console.log("Intentando crear usuario...");
       const cred = await createUserWithEmailAndPassword(auth, email, password);
+      console.log("Usuario creado:", cred.user.uid);
+
       await sendEmailVerification(cred.user);
+      console.log("Correo de verificación enviado.");
 
       await saveUserData(cred.user.uid, {
         nombre,
@@ -68,6 +72,7 @@ export default function Register() {
         telefono: telefono || null,
         tipo,
       });
+      console.log("Datos del usuario guardados.");
 
       Swal.fire(
         "¡Registro exitoso!",
@@ -78,7 +83,7 @@ export default function Register() {
       navigate("/login");
     } catch (error) {
       console.error("Error al registrar:", error);
-      Swal.fire("Error", "No se pudo registrar", "error");
+      Swal.fire("Error", error.message || "No se pudo registrar", "error");
     }
   };
 
@@ -135,7 +140,7 @@ export default function Register() {
             onChange={(e) => setDireccion(e.target.value)}
             required
             minLength={5}
-            maxLength={70}
+            maxLength={70} // corregido para que coincida con la validación
           />
         </div>
 
@@ -158,7 +163,7 @@ export default function Register() {
             type="tel"
             className="form-control"
             value={telefono}
-            onChange={(e) => setTelefono(e.target.value.replace(/\D/g, ""))} // elimina caracteres no numéricos
+            onChange={(e) => setTelefono(e.target.value.replace(/\D/g, ""))}
             placeholder="Ej: 912345678"
             maxLength={15}
           />
