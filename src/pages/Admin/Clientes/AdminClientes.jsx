@@ -22,8 +22,8 @@ export default function AdminClientes() {
       console.error(error);
     }
   };
-
-  const guardar = async () => {
+//CODIGO ANTERIOR POR SI ACASO
+ /* const guardar = async () => {
     if (!formData.nombre || !formData.email || !formData.comuna) {
       return Swal.fire("Error", "Todos los campos son obligatorios.", "error");
     }
@@ -45,6 +45,41 @@ export default function AdminClientes() {
       console.error(error);
     }
   };
+*/
+  const guardar = async () => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const errores = [];
+
+  if (!formData.nombre.trim()) errores.push("El nombre es obligatorio.");
+  if (!formData.email.trim()) errores.push("El email es obligatorio.");
+  else if (!emailRegex.test(formData.email)) errores.push("El email no es válido.");
+  if (!formData.comuna.trim()) errores.push("La comuna es obligatoria.");
+
+  if (!clienteActivo && !formData.password.trim()) {
+    errores.push("La contraseña es obligatoria para nuevo cliente.");
+  }
+
+  if (errores.length > 0) {
+    return Swal.fire("Errores de validación", errores.join("\n"), "error");
+  }
+
+  try {
+    if (clienteActivo) {
+      await updateCliente(clienteActivo.id, formData);
+      Swal.fire("Éxito", "Cliente actualizado.", "success");
+    } else {
+      await registrarClienteConAuth(formData);
+      Swal.fire("Éxito", "Cliente creado.", "success");
+    }
+
+    setShowModal(false);
+    cargarClientes();
+  } catch (error) {
+    Swal.fire("Error", "Hubo un problema guardando el cliente.", "error");
+    console.error(error);
+  }
+};
+
 
   const eliminar = async (id) => {
     const result = await Swal.fire({

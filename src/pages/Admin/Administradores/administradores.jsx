@@ -27,6 +27,13 @@ export default function AdminAdministradores() {
     if (!formData.nombre || !formData.email || (!adminActivo && !formData.password)) {
       return Swal.fire("Error", "Nombre, email y contraseña (solo nuevo) son obligatorios.", "error");
     }
+    // Validacion adicional en el nombre del administrador
+    if (formData.nombre.length < 3 || formData.nombre.length > 50) {
+     return Swal.fire("Error", "El nombre debe tener entre 3 y 50 caracteres.", "error");
+    }
+    if (formData.nombre.trim().length === 0) {
+     return Swal.fire("Error", "El nombre no puede estar vacío o tener solo espacios.", "error");
+    }
 
     try {
       if (adminActivo) {
@@ -51,7 +58,10 @@ export default function AdminAdministradores() {
     if (admin?.esPrincipal) {
       return Swal.fire("Error", "No puedes eliminar al administrador principal.", "error");
     }
-
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(formData.email)) {
+  return Swal.fire("Error", "El email ingresado no es válido.", "error");
+  }
     const result = await Swal.fire({
       title: "¿Eliminar administrador?",
       icon: "warning",
