@@ -1,0 +1,172 @@
+import { useEffect, useState } from "react";
+import Swal from "sweetalert2";
+import {
+  getClientes,
+  updateCliente,
+  deleteCliente,
+  registrarClienteConAuth,
+} from "../../../services/Clientefirebase";
+
+export default function AdminClientes() {
+  const [clientes, setClientes] = useState([]);
+  const [clienteActivo, setClienteActivo] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [formData, setFormData] = useState({ nombre: "", email: "", comuna: "", password: "" });
+
+  const cargarClientes = async () => {
+    try {
+      const data = await getClientes();
+      setClientes(data);
+    } catch (error) {
+      Swal.fire("Error", "No se pudieron cargar los clientes.", "error");
+      console.error(error);
+    }
+  };
+
+  const guardar = async () => {
+    if (!formData.nombre || !formData.email || !formData.comuna) {
+      return Swal.fire("Error", "Todos los campos son obligatorios.", "error");
+    }
+    try {
+      if (clienteActivo) {
+        await updateCliente(clienteActivo.id, formData);
+        Swal.fire("Éxito", "Cliente actualizado.", "success");
+      } else {
+        if (!formData.password) {
+          return Swal.fire("Error", "La contraseña es obligatoria para nuevo cliente.", "error");
+        }
+        await registrarClienteConAuth(formData);
+        Swal.fire("Éxito", "Cliente creado.", "success");
+      }
+      setShowModal(false);
+      cargarClientes();
+    } catch (error) {
+      Swal.fire("Error", "Hubo un problema guardando el cliente.", "error");
+      console.error(error);
+    }
+  };
+
+  const eliminar = async (id) => {
+    const result = await Swal.fire({
+      title: "¿Eliminar cliente?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Sí",
+    });
+    if (result.isConfirmed) {
+      try {
+        await deleteCliente(id);
+        cargarClientes();
+        Swal.fire("Éxito", "Cliente eliminado.", "success");
+      } catch (error) {
+        Swal.fire("Error", "No se pudo eliminar el cliente.", "error");
+        console.error(error);
+      }
+    }
+  };
+
+  useEffect(() => {
+    cargarClientes();
+  }, []);
+
+  return (
+    <div className="container mt-4">
+      <h3>Clientes Registrados</h3>
+      <button
+        className="btn btn-primary"
+        onClick={() => {
+          setClienteActivo(null);
+          setFormData({ nombre: "", email: "", comuna: "", password: "" });
+          setShowModal(true);
+        }}
+      >
+        Nuevo Cliente
+      </button>
+      <table className="table mt-3">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Email</th>
+            <th>Comuna</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {clientes.map((c) => (
+            <tr key={c.id}>
+              <td>{c.nombre}</td>
+              <td>{c.email}</td>
+              <td>{c.comuna}</td>
+              <td>
+                <button
+                  className="btn btn-warning btn-sm"
+                  onClick={() => {
+                    setClienteActivo(c);
+                    setFormData({ ...c, password: "" }); // no mostrar contraseña
+                    setShowModal(true);
+                  }}
+                >
+                  Editar
+                </button>{" "}
+                <button
+                  className="btn btn-danger btn-sm"
+                  onClick={() => eliminar(c.id)}
+                >
+                  Eliminar
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {showModal && (
+        <div className="modal d-block" tabIndex="-1">
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">{clienteActivo ? "Editar Cliente" : "Nuevo Cliente"}</h5>
+              </div>
+              <div className="modal-body">
+                <input
+                  className="form-control mb-2"
+                  placeholder="Nombre"
+                  value={formData.nombre}
+                  onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+                />
+                <input
+                  className="form-control mb-2"
+                  placeholder="Email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                />
+                <input
+                  className="form-control mb-2"
+                  placeholder="Comuna"
+                  value={formData.comuna}
+                  onChange={(e) => setFormData({ ...formData, comuna: e.target.value })}
+                />
+                {!clienteActivo && (
+                  <input
+                    type="password"
+                    className="form-control mb-2"
+                    placeholder="Contraseña"
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  />
+                )}
+              </div>
+              <div className="modal-footer">
+                <button className="btn btn-secondary" onClick={() => setShowModal(false)}>
+                  Cancelar
+                </button>
+                <button className="btn btn-success" onClick={guardar}>
+                  Guardar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
