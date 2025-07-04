@@ -23,6 +23,7 @@ export default function AdminAdministradores() {
     }
   };
 
+<<<<<<< HEAD
   const validarEmail = (email) => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return re.test(email);
@@ -34,6 +35,36 @@ export default function AdminAdministradores() {
     if (!nombre || nombre.trim().length < 3) {
       Swal.fire("Error", "El nombre debe tener al menos 3 caracteres.", "error");
       return false;
+=======
+  const guardar = async () => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const errores = [];
+
+  const nombreTrim = formData.nombre.trim();
+  const emailTrim = formData.email.trim().toLowerCase();
+  const passwordTrim = formData.password.trim();
+
+  // Validación del nombre
+  if (!nombreTrim) {
+    errores.push("El nombre es obligatorio.");
+  } else if (nombreTrim.length < 3 || nombreTrim.length > 50) {
+    errores.push("El nombre debe tener entre 3 y 50 caracteres.");
+  }
+
+  // Validación del email
+  if (!emailTrim) {
+    errores.push("El email es obligatorio.");
+  } else if (!emailRegex.test(emailTrim)) {
+    errores.push("El email no tiene un formato válido.");
+  }
+
+  // Validación de la contraseña (solo para nuevos administradores)
+  if (!adminActivo) {
+    if (!passwordTrim) {
+      errores.push("La contraseña es obligatoria para nuevo administrador.");
+    } else if (passwordTrim.length < 6) {
+      errores.push("La contraseña debe tener al menos 6 caracteres.");
+>>>>>>> ca143e034b527e8074b145b044f7a877b68f2481
     }
     if (nombre.trim().length > 50) {
       Swal.fire("Error", "El nombre no debe superar 50 caracteres.", "error");
@@ -71,6 +102,7 @@ export default function AdminAdministradores() {
   const guardar = async () => {
     if (!validarFormulario()) return;
 
+<<<<<<< HEAD
     try {
       if (adminActivo) {
         // Solo el admin con id "Root" puede ser principal
@@ -88,8 +120,40 @@ export default function AdminAdministradores() {
     } catch (error) {
       Swal.fire("Error", "Hubo un problema guardando el administrador.", "error");
       console.error(error);
+=======
+    // Validación de email duplicado
+    const emailExiste = admins.some(
+      (admin) => admin.email.toLowerCase() === emailTrim
+    );
+    if (emailExiste) {
+      errores.push("El email ya está registrado por otro administrador.");
+>>>>>>> ca143e034b527e8074b145b044f7a877b68f2481
     }
-  };
+  }
+
+  if (errores.length > 0) {
+    return Swal.fire("Errores de validación", errores.join("\n"), "error");
+  }
+
+  try {
+    if (adminActivo) {
+      await updateAdministrador(adminActivo.id, { ...formData, email: emailTrim, nombre: nombreTrim });
+      Swal.fire("Éxito", "Administrador actualizado.", "success");
+    } else {
+      await registrarAdminConAuth({ ...formData, email: emailTrim, nombre: nombreTrim, password: passwordTrim });
+      Swal.fire("Éxito", "Administrador creado.", "success");
+    }
+
+    setShowModal(false);
+    setAdminActivo(null);
+    setFormData({ nombre: "", email: "", password: "", esPrincipal: false });
+    cargarAdmins();
+  } catch (error) {
+    Swal.fire("Error", "Hubo un problema guardando el administrador.", "error");
+    console.error(error);
+  }
+};
+
 
   const eliminar = async (id) => {
     const admin = admins.find(a => a.id === id);
@@ -97,7 +161,10 @@ export default function AdminAdministradores() {
     if (admin?.esPrincipal) {
       return Swal.fire("Error", "No puedes eliminar al administrador principal.", "error");
     }
-
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(formData.email)) {
+  return Swal.fire("Error", "El email ingresado no es válido.", "error");
+  }
     const result = await Swal.fire({
       title: "¿Eliminar administrador?",
       icon: "warning",

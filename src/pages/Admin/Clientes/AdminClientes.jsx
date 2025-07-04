@@ -31,6 +31,7 @@ export default function AdminClientes() {
       console.error(error);
     }
   };
+<<<<<<< HEAD
 
   const validarEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
@@ -52,6 +53,12 @@ export default function AdminClientes() {
       if (!password) errores.push("La contraseña es obligatoria para nuevo cliente.");
       else if (password.length < 6) errores.push("La contraseña debe tener al menos 6 caracteres.");
       else if (password.length > 100) errores.push("La contraseña no debe superar 100 caracteres.");
+=======
+//CODIGO ANTERIOR POR SI ACASO
+ /* const guardar = async () => {
+    if (!formData.nombre || !formData.email || !formData.comuna) {
+      return Swal.fire("Error", "Todos los campos son obligatorios.", "error");
+>>>>>>> ca143e034b527e8074b145b044f7a877b68f2481
     }
 
     if (errores.length > 0) {
@@ -80,6 +87,65 @@ export default function AdminClientes() {
       console.error(error);
     }
   };
+*/
+  const guardar = async () => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const errores = [];
+
+  // Validación del nombre
+  if (!formData.nombre.trim()) {
+    errores.push("El nombre es obligatorio.");
+  } else if (formData.nombre.trim().length < 3) {
+    errores.push("El nombre debe tener al menos 3 caracteres.");
+  }
+
+  // Validación del email
+  if (!formData.email.trim()) {
+    errores.push("El email es obligatorio.");
+  } else if (!emailRegex.test(formData.email.trim())) {
+    errores.push("El email no tiene un formato válido.");
+  }
+
+  // Validación de la comuna
+  if (!formData.comuna.trim()) {
+    errores.push("La comuna es obligatoria.");
+  } else if (formData.comuna.trim().length < 3) {
+    errores.push("La comuna debe tener al menos 3 caracteres.");
+  }
+
+  // Validación de la contraseña solo para nuevos clientes
+  if (!clienteActivo) {
+    if (!formData.password.trim()) {
+      errores.push("La contraseña es obligatoria para nuevo cliente.");
+    } else if (formData.password.trim().length < 6) {
+      errores.push("La contraseña debe tener al menos 6 caracteres.");
+    }
+  }
+
+  if (errores.length > 0) {
+    return Swal.fire("Errores de validación", errores.join("\n"), "error");
+  }
+
+  try {
+    if (clienteActivo) {
+      await updateCliente(clienteActivo.id, formData);
+      Swal.fire("Éxito", "Cliente actualizado.", "success");
+    } else {
+      await registrarClienteConAuth(formData);
+      Swal.fire("Éxito", "Cliente creado.", "success");
+    }
+
+    setShowModal(false);
+    setClienteActivo(null);
+    setFormData({ nombre: "", email: "", comuna: "", password: "" });
+    cargarClientes();
+  } catch (error) {
+    Swal.fire("Error", "Hubo un problema guardando el cliente.", "error");
+    console.error(error);
+  }
+};
+
+
 
   const eliminar = async (id) => {
     const result = await Swal.fire({
