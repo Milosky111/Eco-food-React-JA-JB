@@ -24,33 +24,67 @@ export default function AdminAdministradores() {
   };
 
   const guardar = async () => {
-    if (!formData.nombre || !formData.email || (!adminActivo && !formData.password)) {
-      return Swal.fire("Error", "Nombre, email y contraseña (solo nuevo) son obligatorios.", "error");
-    }
-    // Validacion adicional en el nombre del administrador
-    if (formData.nombre.length < 3 || formData.nombre.length > 50) {
-     return Swal.fire("Error", "El nombre debe tener entre 3 y 50 caracteres.", "error");
-    }
-    if (formData.nombre.trim().length === 0) {
-     return Swal.fire("Error", "El nombre no puede estar vacío o tener solo espacios.", "error");
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const errores = [];
+
+  const nombreTrim = formData.nombre.trim();
+  const emailTrim = formData.email.trim().toLowerCase();
+  const passwordTrim = formData.password.trim();
+
+  // Validación del nombre
+  if (!nombreTrim) {
+    errores.push("El nombre es obligatorio.");
+  } else if (nombreTrim.length < 3 || nombreTrim.length > 50) {
+    errores.push("El nombre debe tener entre 3 y 50 caracteres.");
+  }
+
+  // Validación del email
+  if (!emailTrim) {
+    errores.push("El email es obligatorio.");
+  } else if (!emailRegex.test(emailTrim)) {
+    errores.push("El email no tiene un formato válido.");
+  }
+
+  // Validación de la contraseña (solo para nuevos administradores)
+  if (!adminActivo) {
+    if (!passwordTrim) {
+      errores.push("La contraseña es obligatoria para nuevo administrador.");
+    } else if (passwordTrim.length < 6) {
+      errores.push("La contraseña debe tener al menos 6 caracteres.");
     }
 
-    try {
-      if (adminActivo) {
-        await updateAdministrador(adminActivo.id, formData);
-        Swal.fire("Éxito", "Administrador actualizado.", "success");
-      } else {
-        // Para registrar un admin nuevo
-        await registrarAdminConAuth(formData);
-        Swal.fire("Éxito", "Administrador creado.", "success");
-      }
-      setShowModal(false);
-      cargarAdmins();
-    } catch (error) {
-      Swal.fire("Error", "Hubo un problema guardando el administrador.", "error");
-      console.error(error);
+    // Validación de email duplicado
+    const emailExiste = admins.some(
+      (admin) => admin.email.toLowerCase() === emailTrim
+    );
+    if (emailExiste) {
+      errores.push("El email ya está registrado por otro administrador.");
     }
-  };
+  }
+
+  if (errores.length > 0) {
+    return Swal.fire("Errores de validación", errores.join("\n"), "error");
+  }
+
+  try {
+    if (adminActivo) {
+      await updateAdministrador(adminActivo.id, { ...formData, email: emailTrim, nombre: nombreTrim });
+      Swal.fire("Éxito", "Administrador actualizado.", "success");
+    } else {
+      await registrarAdminConAuth({ ...formData, email: emailTrim, nombre: nombreTrim, password: passwordTrim });
+      Swal.fire("Éxito", "Administrador creado.", "success");
+    }
+
+    setShowModal(false);
+    setAdminActivo(null);
+    setFormData({ nombre: "", email: "", password: "", esPrincipal: false });
+    cargarAdmins();
+  } catch (error) {
+    Swal.fire("Error", "Hubo un problema guardando el administrador.", "error");
+    console.error(error);
+  }
+};
+
 
   const eliminar = async (id) => {
     const admin = admins.find(a => a.id === id);

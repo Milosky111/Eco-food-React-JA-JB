@@ -50,13 +50,34 @@ export default function AdminClientes() {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const errores = [];
 
-  if (!formData.nombre.trim()) errores.push("El nombre es obligatorio.");
-  if (!formData.email.trim()) errores.push("El email es obligatorio.");
-  else if (!emailRegex.test(formData.email)) errores.push("El email no es válido.");
-  if (!formData.comuna.trim()) errores.push("La comuna es obligatoria.");
+  // Validación del nombre
+  if (!formData.nombre.trim()) {
+    errores.push("El nombre es obligatorio.");
+  } else if (formData.nombre.trim().length < 3) {
+    errores.push("El nombre debe tener al menos 3 caracteres.");
+  }
 
-  if (!clienteActivo && !formData.password.trim()) {
-    errores.push("La contraseña es obligatoria para nuevo cliente.");
+  // Validación del email
+  if (!formData.email.trim()) {
+    errores.push("El email es obligatorio.");
+  } else if (!emailRegex.test(formData.email.trim())) {
+    errores.push("El email no tiene un formato válido.");
+  }
+
+  // Validación de la comuna
+  if (!formData.comuna.trim()) {
+    errores.push("La comuna es obligatoria.");
+  } else if (formData.comuna.trim().length < 3) {
+    errores.push("La comuna debe tener al menos 3 caracteres.");
+  }
+
+  // Validación de la contraseña solo para nuevos clientes
+  if (!clienteActivo) {
+    if (!formData.password.trim()) {
+      errores.push("La contraseña es obligatoria para nuevo cliente.");
+    } else if (formData.password.trim().length < 6) {
+      errores.push("La contraseña debe tener al menos 6 caracteres.");
+    }
   }
 
   if (errores.length > 0) {
@@ -73,12 +94,15 @@ export default function AdminClientes() {
     }
 
     setShowModal(false);
+    setClienteActivo(null);
+    setFormData({ nombre: "", email: "", comuna: "", password: "" });
     cargarClientes();
   } catch (error) {
     Swal.fire("Error", "Hubo un problema guardando el cliente.", "error");
     console.error(error);
   }
 };
+
 
 
   const eliminar = async (id) => {
