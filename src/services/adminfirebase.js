@@ -1,4 +1,4 @@
-import { db, secondaryAuth } from "./firebase"; // secondaryAuth para crear usuarios sin afectar sesión actual
+import { db, secondaryAuth } from "./firebase";
 import {
   collection,
   query,
@@ -8,22 +8,21 @@ import {
   updateDoc,
   deleteDoc,
   doc,
-  setDoc,
 } from "firebase/firestore";
 import {
   createUserWithEmailAndPassword,
   sendEmailVerification,
 } from "firebase/auth";
 
-const adminsCollection = collection(db, "usuarios"); // Asumiendo colección "usuarios" con tipo "admin"
+const adminsCollection = collection(db, "administradores");
 
 // Obtener todos los administradores
 export const getAdministradores = async () => {
-  const q = query(adminsCollection, where("tipo", "==", "admin"));
+  const q = query(adminsCollection);
   const querySnapshot = await getDocs(q);
   const admins = [];
-  querySnapshot.forEach((doc) => {
-    admins.push({ id: doc.id, ...doc.data() });
+  querySnapshot.forEach((docSnap) => {
+    admins.push({ id: docSnap.id, ...docSnap.data() });
   });
   return admins;
 };
@@ -31,7 +30,6 @@ export const getAdministradores = async () => {
 // Registrar administrador nuevo (Auth + Firestore)
 export const registrarAdminConAuth = async (datos) => {
   try {
-    // Crear usuario en Auth (secondaryAuth para no afectar sesión actual)
     const cred = await createUserWithEmailAndPassword(
       secondaryAuth,
       datos.email,
@@ -39,20 +37,16 @@ export const registrarAdminConAuth = async (datos) => {
     );
     await sendEmailVerification(cred.user);
 
-    // Si se marca admin principal, desactivar en los demás admins
-    if (datos.esPrincipal) {
-      await desactivarAdminPrincipalExistente();
-    }
-
-    // Guardar datos en Firestore
-    await setDoc(doc(db, "usuarios", cred.user.uid), {
+    // Guardar datos en Firestore con ID auto generado
+    await addDoc(adminsCollection, {
       nombre: datos.nombre,
       email: datos.email,
       tipo: "admin",
       esPrincipal: datos.esPrincipal || false,
+      id: cred.user.uid,
     });
 
-    await secondaryAuth.signOut(); // cerrar sesión secundaria
+    await secondaryAuth.signOut();
 
     return cred;
   } catch (error) {
@@ -63,13 +57,7 @@ export const registrarAdminConAuth = async (datos) => {
 
 // Actualizar datos de administrador
 export const updateAdministrador = async (id, datos) => {
-  const adminRef = doc(db, "usuarios", id);
-
-  if (datos.esPrincipal) {
-    await desactivarAdminPrincipalExistente(id); // Pasa id para ignorar el admin actual
-  }
-
-  // No actualizar password aquí, manejarlo aparte si quieres
+  const adminRef = doc(db, "administradores", id);
 
   await updateDoc(adminRef, {
     nombre: datos.nombre,
@@ -80,27 +68,6 @@ export const updateAdministrador = async (id, datos) => {
 
 // Eliminar administrador
 export const deleteAdministrador = async (id) => {
-  const adminRef = doc(db, "usuarios", id);
+  const adminRef = doc(db, "administradores", id);
   await deleteDoc(adminRef);
-};
-
-// Función para desactivar admin principal actual (excepto id opcional)
-const desactivarAdminPrincipalExistente = async (exceptId = null) => {
-  const q = query(
-    adminsCollection,
-    where("tipo", "==", "admin"),
-    where("esPrincipal", "==", true)
-  );
-  const querySnapshot = await getDocs(q);
-
-  const batchUpdates = [];
-  querySnapshot.forEach((docSnap) => {
-    if (docSnap.id !== exceptId) {
-      batchUpdates.push(
-        updateDoc(doc(db, "usuarios", docSnap.id), { esPrincipal: false })
-      );
-    }
-  });
-
-  await Promise.all(batchUpdates);
 };

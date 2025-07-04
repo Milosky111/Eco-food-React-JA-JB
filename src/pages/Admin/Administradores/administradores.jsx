@@ -5,7 +5,7 @@ import {
   registrarAdminConAuth,
   updateAdministrador,
   deleteAdministrador,
-} from "../../../services/AdminFirebase"; // Ajusta el path a tu servicio
+} from "../../../services/adminfirebase";
 
 export default function AdminAdministradores() {
   const [admins, setAdmins] = useState([]);
@@ -23,18 +23,64 @@ export default function AdminAdministradores() {
     }
   };
 
-  const guardar = async () => {
-    if (!formData.nombre || !formData.email || (!adminActivo && !formData.password)) {
-      return Swal.fire("Error", "Nombre, email y contraseña (solo nuevo) son obligatorios.", "error");
+  const validarEmail = (email) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  };
+
+  const validarFormulario = () => {
+    const { nombre, email, password } = formData;
+
+    if (!nombre || nombre.trim().length < 3) {
+      Swal.fire("Error", "El nombre debe tener al menos 3 caracteres.", "error");
+      return false;
     }
+    if (nombre.trim().length > 50) {
+      Swal.fire("Error", "El nombre no debe superar 50 caracteres.", "error");
+      return false;
+    }
+
+    if (!email || !validarEmail(email)) {
+      Swal.fire("Error", "Por favor ingresa un email válido.", "error");
+      return false;
+    }
+    if (email.length > 100) {
+      Swal.fire("Error", "El email no debe superar 100 caracteres.", "error");
+      return false;
+    }
+
+    if (!adminActivo) {
+      // Validar password para nuevo admin
+      if (!password) {
+        Swal.fire("Error", "La contraseña es obligatoria para nuevo administrador.", "error");
+        return false;
+      }
+      if (password.length < 6) {
+        Swal.fire("Error", "La contraseña debe tener al menos 6 caracteres.", "error");
+        return false;
+      }
+      if (password.length > 100) {
+        Swal.fire("Error", "La contraseña no debe superar 100 caracteres.", "error");
+        return false;
+      }
+    }
+
+    return true;
+  };
+
+  const guardar = async () => {
+    if (!validarFormulario()) return;
 
     try {
       if (adminActivo) {
-        await updateAdministrador(adminActivo.id, formData);
+        // Solo el admin con id "Root" puede ser principal
+        const updatedData = adminActivo.id === "Root"
+          ? { ...formData, esPrincipal: true }
+          : { ...formData, esPrincipal: false };
+        await updateAdministrador(adminActivo.id, updatedData);
         Swal.fire("Éxito", "Administrador actualizado.", "success");
       } else {
-        // Para registrar un admin nuevo
-        await registrarAdminConAuth(formData);
+        await registrarAdminConAuth({ ...formData, esPrincipal: false });
         Swal.fire("Éxito", "Administrador creado.", "success");
       }
       setShowModal(false);
@@ -103,7 +149,9 @@ export default function AdminAdministradores() {
             <tr key={a.id}>
               <td>{a.nombre}</td>
               <td>{a.email}</td>
-              <td>{a.esPrincipal ? "Sí" : "No"}</td>
+              <td style={{ fontWeight: a.esPrincipal ? "bold" : "normal", color: a.esPrincipal ? "#007bff" : "inherit" }}>
+                {a.esPrincipal ? "Sí" : "No"}
+              </td>
               <td>
                 <button
                   className="btn btn-warning btn-sm"
@@ -144,12 +192,15 @@ export default function AdminAdministradores() {
                   placeholder="Nombre"
                   value={formData.nombre}
                   onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+                  maxLength={50}
                 />
                 <input
                   className="form-control mb-2"
                   placeholder="Email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  maxLength={100}
+                  type="email"
                 />
                 {!adminActivo && (
                   <input
@@ -158,21 +209,11 @@ export default function AdminAdministradores() {
                     placeholder="Contraseña"
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    minLength={6}
+                    maxLength={100}
                   />
                 )}
-                <div className="form-check">
-                  <input
-                    type="checkbox"
-                    className="form-check-input"
-                    id="esPrincipal"
-                    checked={formData.esPrincipal}
-                    onChange={(e) => setFormData({ ...formData, esPrincipal: e.target.checked })}
-                    disabled={adminActivo?.esPrincipal}
-                  />
-                  <label className="form-check-label" htmlFor="esPrincipal">
-                    Admin Principal
-                  </label>
-                </div>
+                {/* Checkbox eliminado para evitar modificar esPrincipal */}
               </div>
 
               <div className="modal-footer">

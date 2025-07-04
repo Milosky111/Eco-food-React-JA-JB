@@ -8,7 +8,7 @@ export default function Empresas() {
   const [loading, setLoading] = useState(true);
   const [empresaEdit, setEmpresaEdit] = useState(null);
   const [showForm, setShowForm] = useState(false);
-  const [empresaSeleccionada, setEmpresaSeleccionada] = useState(null); // NUEVO
+  const [empresaSeleccionada, setEmpresaSeleccionada] = useState(null);
 
   useEffect(() => {
     cargarEmpresas();
@@ -31,7 +31,6 @@ export default function Empresas() {
     if (window.confirm("¿Está seguro de eliminar esta empresa?")) {
       try {
         await eliminarEmpresa(id);
-        // Si borras la empresa seleccionada, la deseleccionas
         if (empresaSeleccionada?.id === id) setEmpresaSeleccionada(null);
         cargarEmpresas();
       } catch (error) {
@@ -70,67 +69,94 @@ export default function Empresas() {
     }
   };
 
-  if (loading) return <p>Cargando empresas...</p>;
+  if (loading) return <div className="text-center my-4"><div className="spinner-border" role="status"><span className="visually-hidden">Cargando...</span></div></div>;
 
   return (
-    <div>
-      <h2>Empresas</h2>
-      <button onClick={abrirFormularioCrear}>Crear Nueva Empresa</button>
+    <div className="container mt-4">
+      <h2 className="mb-4">Empresas</h2>
+      <button className="btn btn-primary mb-3" onClick={abrirFormularioCrear}>
+        Crear Nueva Empresa
+      </button>
 
       {showForm && (
-        <EmpresaForm
-          empresaEdit={empresaEdit}
-          onClose={cerrarFormulario}
-          onSave={guardar}
-        />
+        <div className="mb-4">
+          <EmpresaForm
+            empresaEdit={empresaEdit}
+            onClose={cerrarFormulario}
+            onSave={guardar}
+          />
+        </div>
       )}
 
-      <table border="1" cellPadding="5" cellSpacing="0" style={{ marginTop: "1em", width: "100%" }}>
-        <thead>
-          <tr>
-            <th>Nombre</th>
-            <th>Rut</th>
-            <th>Dirección</th>
-            <th>Comuna</th>
-            <th>Email</th>
-            <th>Teléfono</th>
-            <th>Acciones</th>
-            <th>Productos</th> 
-          </tr>
-        </thead>
-        <tbody>
-          {empresas.length === 0 ? (
+      <div className="table-responsive">
+        <table className="table table-striped table-bordered align-middle">
+          <thead className="table-dark">
             <tr>
-              <td colSpan="8" style={{ textAlign: "center" }}>No hay empresas registradas</td>
+              <th>Nombre</th>
+              <th>Rut</th>
+              <th>Dirección</th>
+              <th>Comuna</th>
+              <th>Email</th>
+              <th>Teléfono</th>
+              <th>Acciones</th>
+              <th>Productos</th>
             </tr>
-          ) : (
-            empresas.map((empresa) => (
-              <tr key={empresa.id}>
-                <td>{empresa.nombre}</td>
-                <td>{empresa.rut}</td>
-                <td>{empresa.direccion}</td>
-                <td>{empresa.comuna}</td>
-                <td>{empresa.email}</td>
-                <td>{empresa.telefono}</td>
-                <td>
-                  <button onClick={() => abrirFormularioEditar(empresa)}>Editar</button>{" "}
-                  <button onClick={() => handleEliminar(empresa.id)}>Eliminar</button>
-                </td>
-                <td>
-                  <button onClick={() => setEmpresaSeleccionada(empresa)}>
-                    Ver Productos
-                  </button>
+          </thead>
+          <tbody>
+            {empresas.length === 0 ? (
+              <tr>
+                <td colSpan="8" className="text-center">
+                  No hay empresas registradas
                 </td>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+            ) : (
+              empresas.map((empresa) => (
+                <tr key={empresa.id}>
+                  <td>{empresa.nombre}</td>
+                  <td>{empresa.rut}</td>
+                  <td>{empresa.direccion}</td>
+                  <td>{empresa.comuna}</td>
+                  <td>{empresa.email}</td>
+                  <td>{empresa.telefono}</td>
+                  <td>
+                    <button
+                      className="btn btn-sm btn-warning me-2"
+                      onClick={() => abrirFormularioEditar(empresa)}
+                    >
+                      Editar
+                    </button>
+                    <button
+                      className="btn btn-sm btn-danger"
+                      onClick={() => handleEliminar(empresa.id)}
+                    >
+                      Eliminar
+                    </button>
+                  </td>
+                  <td>
+                    <button
+                      className="btn btn-sm btn-info"
+                      onClick={() => setEmpresaSeleccionada(empresa)}
+                    >
+                      Ver Productos
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+
       {empresaSeleccionada && (
-        <div style={{ marginTop: 20 }}>
-          <h2>Productos de {empresaSeleccionada.nombre}</h2>
+        <div className="mt-4 p-3 border rounded bg-light">
+          <h3>Productos de {empresaSeleccionada.nombre}</h3>
           <ProductosPorEmpresa empresaId={empresaSeleccionada.id} />
-          <button onClick={() => setEmpresaSeleccionada(null)}>Cerrar productos</button>
+          <button
+            className="btn btn-secondary mt-3"
+            onClick={() => setEmpresaSeleccionada(null)}
+          >
+            Cerrar productos
+          </button>
         </div>
       )}
     </div>

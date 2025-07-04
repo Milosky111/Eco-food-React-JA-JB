@@ -8,40 +8,64 @@ export default function ProductosPorEmpresa({ empresaId }) {
   useEffect(() => {
     if (empresaId) {
       cargarProductos();
-    }               
+    } else {
+      setProductos([]);
+    }
   }, [empresaId]);
 
   const cargarProductos = async () => {
-    const data = await getProductosPorEmpresa(empresaId);
-    setProductos(data);
+    try {
+      const data = await getProductosPorEmpresa(empresaId);
+      setProductos(data);
+    } catch (error) {
+      console.error("Error cargando productos:", error);
+    }
   };
 
   const agregarProducto = async () => {
     if (!nuevoNombre.trim()) return;
-    await addProducto({ nombre: nuevoNombre, empresaId });
-    setNuevoNombre("");
-    cargarProductos();
+
+    try {
+      await addProducto({ nombre: nuevoNombre.trim(), empresaId });
+      setNuevoNombre("");
+      cargarProductos();
+    } catch (error) {
+      console.error("Error agregando producto:", error);
+    }
   };
 
   const eliminar = async (id) => {
-    await eliminarProducto(id);
-    cargarProductos();
+    try {
+      await eliminarProducto(id);
+      cargarProductos();
+    } catch (error) {
+      console.error("Error eliminando producto:", error);
+    }
   };
 
   return (
-    <div>
+    <div className="container mt-4">
       <h3>Productos de la empresa</h3>
-      <input
-        value={nuevoNombre}
-        onChange={e => setNuevoNombre(e.target.value)}
-        placeholder="Nombre del producto"
-      />
-      <button onClick={agregarProducto}>Agregar Producto</button>
-      <ul>
-        {productos.map(p => (
-          <li key={p.id}>
-            {p.nombre}{" "}
-            <button onClick={() => eliminar(p.id)}>Eliminar</button>
+      <div className="input-group mb-3">
+        <input
+          type="text"
+          className="form-control"
+          placeholder="Nombre del producto"
+          value={nuevoNombre}
+          onChange={(e) => setNuevoNombre(e.target.value)}
+        />
+        <button className="btn btn-primary" onClick={agregarProducto}>
+          Agregar Producto
+        </button>
+      </div>
+
+      <ul className="list-group">
+        {productos.map((p) => (
+          <li key={p.id} className="list-group-item d-flex justify-content-between align-items-center">
+            {p.nombre}
+            <button className="btn btn-danger btn-sm" onClick={() => eliminar(p.id)}>
+              Eliminar
+            </button>
           </li>
         ))}
       </ul>

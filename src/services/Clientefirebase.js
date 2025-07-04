@@ -23,10 +23,16 @@ export const registrarClienteConAuth = async (datos) => {
     return cred;
   } catch (error) {
     console.error("Error registrando cliente:", error);
-    throw error;
+
+    // Detectar si el email ya existe
+    if (error.code === "auth/email-already-in-use") {
+      throw new Error("El correo electrónico ya está registrado.");
+    }
+
+    // Otros errores genéricos
+    throw new Error("Error al registrar el cliente. Intente nuevamente.");
   }
 };
-
 // Obtener clientes (usuarios tipo cliente)
 export const getClientes = async () => {
   const q = query(usuariosCollection, where("tipo", "==", "cliente"));
