@@ -13,6 +13,7 @@ if (firebaseUser) {
 setUser(firebaseUser);
 try {
 const data = await getUserData(firebaseUser.uid);
+data.uid = firebaseUser.uid; //añadido por la guia
 setUserData(data);
 } catch (error) {
 console.error("Error cargando datos de Firestore:", error);
