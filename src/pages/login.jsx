@@ -20,7 +20,7 @@ export default function Login() {
     try {
       await setPersistence(auth, browserLocalPersistence);
       const cred = await signInWithEmailAndPassword(auth, email, password);
-      await cred.user.reload(); // asegura obtener emailVerified actualizado
+      await cred.user.reload();
 
       if (!cred.user.emailVerified) {
         await signOut(auth);
@@ -40,10 +40,21 @@ export default function Login() {
 
       Swal.fire("Bienvenido", "Has iniciado sesión correctamente", "success");
 
-      if (datos.tipo === "admin") navigate("/admin/dashboard");
-      else if (datos.tipo === "cliente") navigate("/cliente/dashboard");
-      else navigate("/home"); // fallback en caso de tipo desconocido
-
+      switch (datos.tipo) {
+        case "administrador":
+          navigate("/admin/dashboard");
+          break;
+        case "empresa":
+          navigate("/empresa/dashboard");
+          break;
+        case "usuario":
+          navigate("/cliente/dashboard");
+          break;
+        default:
+          Swal.fire("Error", "Rol de usuario no reconocido.", "error");
+          await signOut(auth);
+          break;
+      }
     } catch (error) {
       console.error("Error al iniciar sesión:", error.message);
 
@@ -94,7 +105,7 @@ export default function Login() {
       </Link>
       <p className="mt-3 text-center">
         ¿Olvidaste tu contraseña?{" "}
-        <Link to="/RecuperarContraseña" style={{ textDecoration: "underline" }}>
+        <Link to="/recuperar" style={{ textDecoration: "underline" }}>
           Restablecer aquí
         </Link>
       </p>

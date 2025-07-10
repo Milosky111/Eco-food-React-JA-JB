@@ -89,20 +89,16 @@ export default function AdminAdministradores() {
 
     try {
       if (adminActivo) {
-        // Preparar datos a actualizar
+        // Actualizar admin (no actualiza password aquí)
         const datosActualizar = {
           nombre: nombreTrim,
           email: emailTrim,
-          esPrincipal: adminActivo.esPrincipal, // mantener mismo valor
+          esPrincipal: adminActivo.esPrincipal,
         };
-
-        if (passwordTrim) {
-          datosActualizar.password = passwordTrim; // solo si cambió la contraseña
-        }
-
         await updateAdministrador(adminActivo.id, datosActualizar);
         Swal.fire("Éxito", "Administrador actualizado.", "success");
       } else {
+        // Crear nuevo admin
         await registrarAdminConAuth({
           nombre: nombreTrim,
           email: emailTrim,
@@ -146,6 +142,7 @@ export default function AdminAdministradores() {
 
     if (result.isConfirmed) {
       try {
+        console.log("Eliminando admin con id:", id);
         await deleteAdministrador(id);
         Swal.fire("Éxito", "Administrador eliminado.", "success");
         cargarAdmins();

@@ -2,8 +2,9 @@ import { db, secondaryAuth } from "./firebase";
 import {
   collection,
   query,
+  where,
   getDocs,
-  setDoc,
+  addDoc,
   updateDoc,
   deleteDoc,
   doc,
@@ -11,8 +12,6 @@ import {
 import {
   createUserWithEmailAndPassword,
   sendEmailVerification,
-  updateEmail as firebaseUpdateEmail,
-  updatePassword as firebaseUpdatePassword,
 } from "firebase/auth";
 
 const adminsCollection = collection(db, "administradores");
@@ -38,8 +37,8 @@ export const registrarAdminConAuth = async (datos) => {
     );
     await sendEmailVerification(cred.user);
 
-    // Guardar datos en Firestore usando UID como ID
-    await setDoc(doc(db, "administradores", cred.user.uid), {
+    // Guardar datos en Firestore con ID generado por Auth UID
+    await addDoc(adminsCollection, {
       nombre: datos.nombre,
       email: datos.email,
       tipo: "admin",
@@ -56,47 +55,19 @@ export const registrarAdminConAuth = async (datos) => {
   }
 };
 
-// Actualizar datos de administrador en Firestore y Authentication (email y opcional contraseña)
+// Actualizar datos de administrador
 export const updateAdministrador = async (id, datos) => {
-  // Actualizar Firestore
   const adminRef = doc(db, "administradores", id);
-  await updateDoc(adminRef, {
+
+  const datosActualizar = {
     nombre: datos.nombre,
     email: datos.email,
     esPrincipal: datos.esPrincipal || false,
-  });
+  };
 
-  // Actualizar email y contraseña en Auth si vienen en datos
-  if (datos.email || datos.password) {
-    try {
-      // Iniciar sesión temporalmente con secondaryAuth para poder actualizar
-      // Este paso asume que tienes la contraseña actual para reautenticación
-      // O que el secondaryAuth está configurado para esto
+  // No hay lógica para actualizar contraseña aquí, ya que requiere reautenticación y manejo aparte
 
-      // Si quieres actualizar email:
-      if (datos.email) {
-        const user = secondaryAuth.currentUser;
-        if (!user || user.uid !== id) {
-          // Reautenticar o iniciar sesión con admin para actualizar
-          // Aquí debes proveer cómo obtener la sesión con secondaryAuth
-          throw new Error("No autenticado para actualizar email");
-        }
-        await firebaseUpdateEmail(user, datos.email);
-      }
-
-      // Si quieres actualizar contraseña:
-      if (datos.password) {
-        const user = secondaryAuth.currentUser;
-        if (!user || user.uid !== id) {
-          throw new Error("No autenticado para actualizar contraseña");
-        }
-        await firebaseUpdatePassword(user, datos.password);
-      }
-    } catch (error) {
-      console.error("Error actualizando email o contraseña en Auth:", error);
-      throw error;
-    }
-  }
+  await updateDoc(adminRef, datosActualizar);
 };
 
 // Eliminar administrador
