@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { auth } from "../../services/firebase";
-import { getUserData, updateUserData } from "../../services/empresaService"; // crear updateUserData
+import { getEmpresaDataPorUid, updateEmpresaDataPorId } from "../../services/empresaService";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 
 export default function PerfilEmpresa() {
-  const [userData, setUserData] = useState(null);
+  const [empresaData, setEmpresaData] = useState(null);
   const [formData, setFormData] = useState({
     nombre: "",
     ubicacion: "",
@@ -24,12 +24,14 @@ export default function PerfilEmpresa() {
           Swal.fire("Error", "No hay usuario autenticado", "error");
           return navigate("/login");
         }
-        const datos = await getUserData(usuario.uid);
-        if (!datos || datos.tipo !== "empresa") {
+
+        const datos = await getEmpresaDataPorUid(usuario.uid);
+        if (!datos) {
           Swal.fire("Acceso denegado", "No tienes permiso para acceder a este panel.", "error");
           return navigate("/");
         }
-        setUserData(datos);
+
+        setEmpresaData(datos);
         setFormData({
           nombre: datos.nombre || "",
           ubicacion: datos.ubicacion || "",
@@ -61,12 +63,12 @@ export default function PerfilEmpresa() {
 
     setSaving(true);
     try {
-      await updateUserData(auth.currentUser.uid, {
+      await updateEmpresaDataPorId(empresaData.id, {
         nombre: formData.nombre.trim(),
         ubicacion: formData.ubicacion.trim(),
       });
       Swal.fire("Guardado", "Perfil actualizado correctamente.", "success");
-      setUserData((old) => ({
+      setEmpresaData((old) => ({
         ...old,
         nombre: formData.nombre.trim(),
         ubicacion: formData.ubicacion.trim(),
@@ -89,21 +91,10 @@ export default function PerfilEmpresa() {
 
   return (
     <div className="container mt-5" style={{ maxWidth: "600px" }}>
-      {/* Botón para volver atrás */}
-      <button
-        className="btn btn-outline-secondary mb-3"
-        onClick={() => navigate(-1)}
-        type="button"
-      >
-        ← Volver
-      </button>
-
       <h2>Perfil de Empresa</h2>
       <form onSubmit={handleSubmit}>
         <div className="mb-3">
-          <label htmlFor="nombre" className="form-label">
-            Nombre
-          </label>
+          <label htmlFor="nombre" className="form-label">Nombre</label>
           <input
             id="nombre"
             name="nombre"
@@ -117,9 +108,7 @@ export default function PerfilEmpresa() {
         </div>
 
         <div className="mb-3">
-          <label htmlFor="ubicacion" className="form-label">
-            Ubicación
-          </label>
+          <label htmlFor="ubicacion" className="form-label">Ubicación</label>
           <input
             id="ubicacion"
             name="ubicacion"

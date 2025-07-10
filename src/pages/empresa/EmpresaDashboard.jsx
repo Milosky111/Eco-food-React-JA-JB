@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { auth } from "../../services/firebase";
-import { getUserData } from "../../services/userService";
+import { getEmpresaDataPorUid } from "../../services/empresaService";
 import { useNavigate, Link } from "react-router-dom";
 import Swal from "sweetalert2";
 
@@ -17,13 +17,14 @@ export default function EmpresaDashboard() {
           return navigate("/login");
         }
 
-        const datos = await getUserData(usuario.uid);
-        if (!datos || datos.tipo !== "empresa") {
+        const datosEmpresa = await getEmpresaDataPorUid(usuario.uid);
+
+        if (!datosEmpresa) {
           Swal.fire("Acceso denegado", "No tienes permiso para acceder a este panel.", "error");
           return navigate("/");
         }
 
-        setUserData(datos);
+        setUserData(datosEmpresa);
       } catch (error) {
         console.error("Error al cargar datos:", error);
         Swal.fire("Error", "No se pudieron cargar los datos del usuario", "error");
@@ -35,53 +36,133 @@ export default function EmpresaDashboard() {
 
   if (!userData) {
     return (
-      <div className="d-flex justify-content-center align-items-center" style={{ height: "80vh" }}>
-        <div className="spinner-border text-primary" role="status" />
+      <div
+        className="d-flex justify-content-center align-items-center"
+        style={{ height: "80vh", background: "linear-gradient(135deg, #667eea, #764ba2)" }}
+      >
+        <div className="spinner-border text-light" role="status" aria-label="Loading" />
       </div>
     );
   }
 
   return (
-    <div className="container mt-5">
-      <div className="bg-light p-4 rounded shadow-sm">
-        <div className="d-flex align-items-center mb-4">
-          <i className="bi bi-building display-5 text-primary me-3"></i>
-          <div>
-            <h2 className="mb-1">Panel de Empresa</h2>
-            <p className="mb-0 text-muted">Gestión centralizada de tu cuenta</p>
+    <div
+      className="min-vh-100 d-flex flex-column align-items-center py-5"
+      style={{
+        background: "linear-gradient(135deg, #667eea, #764ba2)",
+        color: "#fff",
+        paddingLeft: "1rem",
+        paddingRight: "1rem",
+      }}
+    >
+      <div style={{ maxWidth: 960, width: "100%" }}>
+        <div className="mb-4 text-center">
+          <h1 className="fw-bold">Hola, {userData.nombre || "Empresa"}</h1>
+          <p className="fs-5">
+            Bienvenido al panel de control de tu empresa. Aquí puedes administrar tus productos,
+            pedidos y perfil.
+          </p>
+        </div>
+
+        <div className="row g-4">
+          {/* Tarjeta Perfil */}
+          <div className="col-md-4">
+            <div
+              className="card h-100 shadow"
+              style={{
+                background: "rgba(255, 255, 255, 0.15)",
+                backdropFilter: "blur(10px)",
+                border: "none",
+                color: "#fff",
+                transition: "transform 0.3s ease",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
+              onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+            >
+              <div className="card-body d-flex flex-column justify-content-center align-items-center">
+                <i className="bi bi-person-circle fs-1 mb-3"></i>
+                <h5 className="card-title">Perfil de Empresa</h5>
+                <p className="card-text text-center" style={{ fontSize: "0.9rem" }}>
+                  Correo: <br />
+                  <span style={{ color: "#a8d0ff", fontFamily: "monospace" }}>
+                    {auth.currentUser.email}
+                  </span>
+                  <br />
+                  {userData.ubicacion && <>Ubicación: {userData.ubicacion}</>}
+                </p>
+                <Link
+                  to="/empresa/perfil"
+                  className="btn btn-outline-light mt-auto w-75"
+                  role="button"
+                >
+                  Editar Perfil
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* Tarjeta Productos */}
+          <div className="col-md-4">
+            <div
+              className="card h-100 shadow"
+              style={{
+                background: "rgba(255, 255, 255, 0.15)",
+                backdropFilter: "blur(10px)",
+                border: "none",
+                color: "#fff",
+                transition: "transform 0.3s ease",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
+              onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+            >
+              <div className="card-body d-flex flex-column justify-content-center align-items-center">
+                <i className="bi bi-box-seam fs-1 mb-3"></i>
+                <h5 className="card-title">Productos</h5>
+                <p className="card-text text-center">
+                  Administra tus productos: crea, edita, elimina y controla su estado.
+                </p>
+                <Link to="/empresa/productos" className="btn btn-outline-light mt-auto w-75">
+                  Gestionar Productos
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* Tarjeta Pedidos */}
+          <div className="col-md-4">
+            <div
+              className="card h-100 shadow"
+              style={{
+                background: "rgba(255, 255, 255, 0.15)",
+                backdropFilter: "blur(10px)",
+                border: "none",
+                color: "#fff",
+                transition: "transform 0.3s ease",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
+              onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+            >
+              <div className="card-body d-flex flex-column justify-content-center align-items-center">
+                <i className="bi bi-receipt fs-1 mb-3"></i>
+                <h5 className="card-title">Pedidos y Cotizaciones</h5>
+                <p className="card-text text-center">
+                  Revisa y administra tus pedidos y cotizaciones pendientes.
+                </p>
+                <Link
+                  to="/empresa/pedidos"
+                  className="btn btn-outline-light mt-auto w-75"
+                  role="button"
+                >
+                  Ver Pedidos
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="mb-3">
-          <h5>Bienvenido, <strong>{userData.nombre || "Empresa"}</strong></h5>
-          <p>Correo: <code>{auth.currentUser.email}</code></p>
-          {userData.ubicacion && <p>Ubicación: <strong>{userData.ubicacion}</strong></p>}
-        </div>
-
-        <div className="mb-4">
-          <h4 className="mb-3">Opciones disponibles</h4>
-          <ul className="list-group">
-            <li className="list-group-item">
-              <Link to="/empresa/productos" className="text-decoration-none">
-                📦 Ver y administrar productos
-              </Link>
-            </li>
-            <li className="list-group-item">
-              <Link to="/empresa/pedidos" className="text-decoration-none text-muted">
-                📋 Revisar pedidos o cotizaciones
-              </Link>
-            </li>
-            <li className="list-group-item">
-              <Link to="/empresa/perfil" className="text-decoration-none text-muted">
-                ⚙️ Editar perfil de empresa
-              </Link>
-            </li>
-          </ul>
-        </div>
-
-        <div className="d-grid">
-          <Link to="/empresa/productos" className="btn btn-primary">
-            Ir a Productos
+        <div className="mt-5 text-center">
+          <Link to="/empresa/productos" className="btn btn-light btn-lg px-5 shadow">
+            <i className="bi bi-box-seam me-2"></i> Ir a Productos
           </Link>
         </div>
       </div>

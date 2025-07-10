@@ -1,6 +1,11 @@
 import { useState, useEffect } from "react";
 import Swal from "sweetalert2";
-import { getEmpresas, addEmpresa, updateEmpresa, eliminarEmpresa } from "../../../services/Empresafirebase";
+import {
+  getEmpresas,
+  updateEmpresa,
+  eliminarEmpresa,
+  crearEmpresaConAuth,
+} from "../../../services/Empresafirebase";
 import EmpresaForm from "./empresasform";
 import ProductosPorEmpresa from "../../../components/Productosempresa";
 
@@ -73,13 +78,13 @@ export default function Empresas() {
       if (empresaEdit) {
         await updateEmpresa(empresaEdit.id, data);
       } else {
-        await addEmpresa(data);
+        await crearEmpresaConAuth(data);
       }
       await cargarEmpresas();
       setShowForm(false);
       Swal.fire("Éxito", "Empresa guardada correctamente.", "success");
     } catch (error) {
-      Swal.fire("Error", "Error guardando empresa: " + error.message, "error");
+      Swal.fire("Error", error.message || "Error guardando empresa", "error");
       console.error(error);
     }
   };

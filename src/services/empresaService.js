@@ -1,13 +1,18 @@
 import { db } from "./firebase";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { collection, query, where, getDocs, updateDoc, doc } from "firebase/firestore";
 
-export const getUserData = async (uid) => {
-  const ref = doc(db, "usuarios", uid);
-  const snap = await getDoc(ref);
-  return snap.exists() ? snap.data() : null;
+export const getEmpresaDataPorUid = async (uid) => {
+  const empresasRef = collection(db, "empresas");
+  const q = query(empresasRef, where("uid", "==", uid));
+  const querySnapshot = await getDocs(q);
+  if (!querySnapshot.empty) {
+    const docSnap = querySnapshot.docs[0];
+    return { id: docSnap.id, ...docSnap.data() };
+  }
+  return null;
 };
 
-export const updateUserData = async (uid, data) => {
-  const ref = doc(db, "usuarios", uid);
-  await updateDoc(ref, data);
+export const updateEmpresaDataPorId = async (id, data) => {
+  const empresaRef = doc(db, "empresas", id);
+  await updateDoc(empresaRef, data);
 };
