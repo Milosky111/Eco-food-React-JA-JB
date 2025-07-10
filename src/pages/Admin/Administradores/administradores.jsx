@@ -23,19 +23,6 @@ export default function AdminAdministradores() {
     }
   };
 
-<<<<<<< HEAD
-  const validarEmail = (email) => {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(email);
-  };
-
-  const validarFormulario = () => {
-    const { nombre, email, password } = formData;
-
-    if (!nombre || nombre.trim().length < 3) {
-      Swal.fire("Error", "El nombre debe tener al menos 3 caracteres.", "error");
-      return false;
-=======
   const guardar = async () => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const errores = [];
@@ -64,7 +51,6 @@ export default function AdminAdministradores() {
       errores.push("La contraseña es obligatoria para nuevo administrador.");
     } else if (passwordTrim.length < 6) {
       errores.push("La contraseña debe tener al menos 6 caracteres.");
->>>>>>> ca143e034b527e8074b145b044f7a877b68f2481
     }
     if (nombre.trim().length > 50) {
       Swal.fire("Error", "El nombre no debe superar 50 caracteres.", "error");
@@ -102,32 +88,12 @@ export default function AdminAdministradores() {
   const guardar = async () => {
     if (!validarFormulario()) return;
 
-<<<<<<< HEAD
-    try {
-      if (adminActivo) {
-        // Solo el admin con id "Root" puede ser principal
-        const updatedData = adminActivo.id === "Root"
-          ? { ...formData, esPrincipal: true }
-          : { ...formData, esPrincipal: false };
-        await updateAdministrador(adminActivo.id, updatedData);
-        Swal.fire("Éxito", "Administrador actualizado.", "success");
-      } else {
-        await registrarAdminConAuth({ ...formData, esPrincipal: false });
-        Swal.fire("Éxito", "Administrador creado.", "success");
-      }
-      setShowModal(false);
-      cargarAdmins();
-    } catch (error) {
-      Swal.fire("Error", "Hubo un problema guardando el administrador.", "error");
-      console.error(error);
-=======
     // Validación de email duplicado
     const emailExiste = admins.some(
       (admin) => admin.email.toLowerCase() === emailTrim
     );
     if (emailExiste) {
       errores.push("El email ya está registrado por otro administrador.");
->>>>>>> ca143e034b527e8074b145b044f7a877b68f2481
     }
   }
 
@@ -298,4 +264,4 @@ export default function AdminAdministradores() {
       )}
     </div>
   );
-}
+};
