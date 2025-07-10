@@ -19,6 +19,7 @@ import AdminAdministradores from "../pages/Admin/Administradores/administradores
 import EmpresaDashboard from "../pages/empresa/EmpresaDashboard";
 import EmpresaProductos from "../pages/Empresa/Productos";
 import EmpresaPerfil from "../pages/empresa/Empresaperfil";
+import Pedidos from "../pages/empresa/Pedidos";
 
 export default function AppRouter() {
   return (
@@ -45,6 +46,7 @@ export default function AppRouter() {
       <Route path="/empresa/dashboard" element={<EmpresaDashboard />} />
       <Route path="/empresa/perfil" element={<EmpresaPerfil />} />
       <Route path="/empresa/productos" element={<EmpresaProductos />} />
+      <Route path="/empresa/pedidos" element={<Pedidos />} /> 
 
       {/* Ruta fallback: si no coincide nada, redirige al login */}
       <Route path="*" element={<Login />} />

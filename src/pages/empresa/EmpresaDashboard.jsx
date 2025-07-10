@@ -56,15 +56,15 @@ export default function EmpresaDashboard() {
       }}
     >
       <div style={{ maxWidth: 960, width: "100%" }}>
-        <div className="mb-4 text-center">
-          <h1 className="fw-bold">Hola, {userData.nombre || "Empresa"}</h1>
-          <p className="fs-5">
+        <div className="mb-5 text-center">
+          <h1 className="fw-bold display-4">Hola, {userData.nombre || "Empresa"}</h1>
+          <p className="fs-4">
             Bienvenido al panel de control de tu empresa. Aquí puedes administrar tus productos,
             pedidos y perfil.
           </p>
         </div>
 
-        <div className="row g-4">
+        <div className="row g-5">
           {/* Tarjeta Perfil */}
           <div className="col-md-4">
             <div
@@ -90,11 +90,7 @@ export default function EmpresaDashboard() {
                   <br />
                   {userData.ubicacion && <>Ubicación: {userData.ubicacion}</>}
                 </p>
-                <Link
-                  to="/empresa/perfil"
-                  className="btn btn-outline-light mt-auto w-75"
-                  role="button"
-                >
+                <Link to="/empresa/perfil" className="btn btn-outline-light mt-auto w-75" role="button">
                   Editar Perfil
                 </Link>
               </div>
@@ -148,24 +144,15 @@ export default function EmpresaDashboard() {
                 <p className="card-text text-center">
                   Revisa y administra tus pedidos y cotizaciones pendientes.
                 </p>
-                <Link
-                  to="/empresa/pedidos"
-                  className="btn btn-outline-light mt-auto w-75"
-                  role="button"
-                >
+                <Link to="/empresa/pedidos" className="btn btn-outline-light mt-auto w-75" role="button">
                   Ver Pedidos
                 </Link>
               </div>
             </div>
           </div>
         </div>
-
-        <div className="mt-5 text-center">
-          <Link to="/empresa/productos" className="btn btn-light btn-lg px-5 shadow">
-            <i className="bi bi-box-seam me-2"></i> Ir a Productos
-          </Link>
-        </div>
       </div>
     </div>
   );
 }
+
