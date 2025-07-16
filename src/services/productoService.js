@@ -24,7 +24,7 @@ export const addProducto = async (producto) => {
   await setDoc(ref, productoConId);
 };
 
-export const deleteProducto = async (id) =>
+export const eliminarProducto = async (id) =>
   await deleteDoc(doc(db, "productos", id));
 
 export const updateProducto = async (id, data) => {
