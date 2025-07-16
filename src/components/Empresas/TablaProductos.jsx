@@ -3,16 +3,10 @@ import PropTypes from "prop-types";
 import {
   obtenerTotalProductos,
   getProductosByEmpresaPagina,
-<<<<<<< HEAD
 } from "../../services/productoService";
 
 const PAGE_OPTIONS = [5, 10, 20];
 
-=======
-  PAGE_SIZE,
-} from "../../services/productoService";
-
->>>>>>> cb539dd4343851c0b39d6c5f5b283f01ffbf1435
 TablaProductos.propTypes = {
   userData: PropTypes.object,
   busqueda: PropTypes.string,
@@ -20,7 +14,6 @@ TablaProductos.propTypes = {
   abrirModal: PropTypes.func.isRequired,
 };
 
-<<<<<<< HEAD
 function calcularEstadoProducto(vencimiento) {
   if (!vencimiento) return "desconocido";
 
@@ -34,8 +27,6 @@ function calcularEstadoProducto(vencimiento) {
   return "disponible";
 }
 
-=======
->>>>>>> cb539dd4343851c0b39d6c5f5b283f01ffbf1435
 export default function TablaProductos({ userData, busqueda, eliminar, abrirModal }) {
   const [total, setTotal] = useState(0);
   const [historial, setHistorial] = useState([]);
@@ -43,7 +34,6 @@ export default function TablaProductos({ userData, busqueda, eliminar, abrirModa
   const [productos, setProductos] = useState([]);
   const [sinMas, setSinMas] = useState(false);
 
-<<<<<<< HEAD
   // Nuevos estados para filtros y ordenamiento
   const [filtroEstado, setFiltroEstado] = useState("todos"); // "todos", "disponible", "por vencer", "vencido"
   const [ordenCampo, setOrdenCampo] = useState("nombre"); // "nombre" o "precio"
@@ -51,15 +41,12 @@ export default function TablaProductos({ userData, busqueda, eliminar, abrirModa
   const [pageSize, setPageSize] = useState(PAGE_OPTIONS[0]);
 
   // Obtener total de productos al montar o cambiar búsqueda, filtro o pageSize
-=======
->>>>>>> cb539dd4343851c0b39d6c5f5b283f01ffbf1435
   useEffect(() => {
     if (!userData) return;
 
     const fetchTotal = async () => {
       const cantidad = await obtenerTotalProductos(userData.uid, busqueda);
       setTotal(cantidad);
-<<<<<<< HEAD
       setPagina(0); // Resetear a página 0 cuando cambian filtros/búsqueda
       setHistorial([]);
     };
@@ -102,28 +89,6 @@ export default function TablaProductos({ userData, busqueda, eliminar, abrirModa
       }
 
       setProductos(filtrados);
-=======
-    };
-
-    fetchTotal();
-  }, [userData, busqueda]);
-
-  useEffect(() => {
-    const cargarPagina = async () => {
-      let cursor = null;
-
-      if (pagina > 0) {
-        cursor = historial[pagina - 1] || null;
-      }
-
-      const { productos: nuevos, lastVisible } = await getProductosByEmpresaPagina(
-        userData.uid,
-        cursor,
-        busqueda
-      );
-
-      setProductos(nuevos);
->>>>>>> cb539dd4343851c0b39d6c5f5b283f01ffbf1435
 
       setHistorial((prev) => {
         const copia = [...prev];
@@ -131,7 +96,6 @@ export default function TablaProductos({ userData, busqueda, eliminar, abrirModa
         return copia;
       });
 
-<<<<<<< HEAD
       setSinMas(nuevos.length < pageSize);
     };
 
@@ -286,57 +250,5 @@ export default function TablaProductos({ userData, busqueda, eliminar, abrirModa
         </div>
       </div>
     </>
-=======
-      setSinMas(nuevos.length < PAGE_SIZE);
-    };
-
-    if (userData) {
-      cargarPagina(); // carga la primera página o la actual
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pagina, userData, busqueda]);
-
-  return (
-    <div className="row">
-      <div className="col-12">
-        <ul className="list-group mb-3">
-          {productos.map((p, i) => (
-            <li key={i} className="list-group-item d-flex justify-content-between align-items-center">
-              {p.nombre} - ${p.precio}
-              <div>
-                <button className="btn btn-warning btn-sm me-2" onClick={() => abrirModal(p)}>
-                  Editar
-                </button>
-                <button className="btn btn-danger btn-sm" onClick={() => eliminar(p.id)}>
-                  Eliminar
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      <div className="col">
-        <p>Total de productos: {total}</p>
-      </div>
-
-      <div className="col-auto">
-        <nav>
-          <ul className="pagination">
-            <li className={`page-item ${pagina < 1 ? "disabled" : ""}`}>
-              <button className="page-link" onClick={() => setPagina((p) => p - 1)}>
-                <i className="fa-solid fa-arrow-left"></i>
-              </button>
-            </li>
-            <li className={`page-item ${sinMas ? "disabled" : ""}`}>
-              <button className="page-link" onClick={() => setPagina((p) => p + 1)}>
-                <i className="fa-solid fa-arrow-right"></i>
-              </button>
-            </li>
-          </ul>
-        </nav>
-      </div>
-    </div>
->>>>>>> cb539dd4343851c0b39d6c5f5b283f01ffbf1435
   );
 }
