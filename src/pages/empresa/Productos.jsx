@@ -2,14 +2,9 @@ import { useState, useCallback } from "react";
 import { useAuth } from "../../context/AuthContext";
 import Swal from "sweetalert2";
 
-import { deleteProducto } from "../../services/productoService";
-<<<<<<< HEAD
-import TablaProductos from "../../components/Empresas/TablaProductos";
-import ModalProductos from "../../components/Empresas/ModalProductos";
-=======
+import { eliminarProducto } from "../../services/productoService";
 import TablaProductos from "../../components/empresa/TablaProductos";
 import ModalProductos from "../../components/empresa/ModalProductos";
->>>>>>> cb539dd4343851c0b39d6c5f5b283f01ffbf1435
 
 export default function Productos() {
   const { userData } = useAuth();
@@ -40,7 +35,7 @@ export default function Productos() {
       });
 
       if (confirm.isConfirmed) {
-        await deleteProducto(id);
+        await eliminarProducto(id);
         handleRefresh();
       }
     } catch (e) {
