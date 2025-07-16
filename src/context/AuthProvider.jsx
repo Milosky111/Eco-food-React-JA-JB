@@ -6,6 +6,7 @@ import { AuthContext } from "./AuthContext"; // Asegúrate de tener este archivo
 import { getUserData } from "../services/userService";
 
 export const AuthProvider = ({ children }) => {
+<<<<<<< Crud-Productos
   const [user, setUser] = useState(null); // Firebase Auth
   const [userData, setUserData] = useState(null); // Firestore: nombre, tipo, etc.
   const [loading, setLoading] = useState(true); // Carga completa
@@ -38,3 +39,34 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
+=======
+const [user, setUser] = useState(null); // Firebase Auth
+const [userData, setUserData] = useState(null); // Firestore: nombre, tipo, etc.
+const [loading, setLoading] = useState(true); // Carga completa
+useEffect(() => {
+const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+if (firebaseUser) {
+setUser(firebaseUser);
+try {
+const data = await getUserData(firebaseUser.uid);
+data.uid = firebaseUser.uid; //añadido por la guia
+setUserData(data);
+} catch (error) {
+console.error("Error cargando datos de Firestore:", error);
+setUserData(null);
+}
+} else {
+setUser(null);
+setUserData(null);
+}
+setLoading(false);
+});
+return () => unsubscribe();
+}, []);
+return (
+<AuthContext.Provider value={{ user, userData, loading }}>
+{children}
+</AuthContext.Provider>
+);
+};
+>>>>>>> main

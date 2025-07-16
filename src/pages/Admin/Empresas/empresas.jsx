@@ -1,5 +1,11 @@
 import { useState, useEffect } from "react";
-import { getEmpresas, addEmpresa, updateEmpresa, eliminarEmpresa } from "../../../services/Empresafirebase";
+import Swal from "sweetalert2";
+import {
+  getEmpresas,
+  updateEmpresa,
+  eliminarEmpresa,
+  crearEmpresaConAuth,
+} from "../../../services/Empresafirebase";
 import EmpresaForm from "./empresasform";
 import ProductosPorEmpresa from "../../../components/Productosempresa";
 
@@ -20,7 +26,7 @@ export default function Empresas() {
       const data = await getEmpresas();
       setEmpresas(data);
     } catch (error) {
-      alert("Error al cargar empresas");
+      Swal.fire("Error", "Error al cargar empresas: " + error.message, "error");
       console.error(error);
     } finally {
       setLoading(false);
@@ -28,13 +34,26 @@ export default function Empresas() {
   };
 
   const handleEliminar = async (id) => {
-    if (window.confirm("¿Está seguro de eliminar esta empresa?")) {
+    const empresa = empresas.find((e) => e.id === id);
+    if (!empresa) return;
+
+    const result = await Swal.fire({
+      title: `¿Eliminar empresa "${empresa.nombre}"?`,
+      text: "Esta acción es irreversible.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Sí, eliminar",
+      cancelButtonText: "Cancelar",
+    });
+
+    if (result.isConfirmed) {
       try {
         await eliminarEmpresa(id);
         if (empresaSeleccionada?.id === id) setEmpresaSeleccionada(null);
-        cargarEmpresas();
+        await cargarEmpresas();
+        Swal.fire("Eliminada", "Empresa eliminada correctamente.", "success");
       } catch (error) {
-        alert("Error eliminando la empresa");
+        Swal.fire("Error", "Error eliminando empresa: " + error.message, "error");
         console.error(error);
       }
     }
@@ -59,22 +78,34 @@ export default function Empresas() {
       if (empresaEdit) {
         await updateEmpresa(empresaEdit.id, data);
       } else {
-        await addEmpresa(data);
+        await crearEmpresaConAuth(data);
       }
-      cargarEmpresas();
+      await cargarEmpresas();
       setShowForm(false);
+      Swal.fire("Éxito", "Empresa guardada correctamente.", "success");
     } catch (error) {
-      alert("Error guardando empresa");
+      Swal.fire("Error", error.message || "Error guardando empresa", "error");
       console.error(error);
     }
   };
 
-  if (loading) return <div className="text-center my-4"><div className="spinner-border" role="status"><span className="visually-hidden">Cargando...</span></div></div>;
+  if (loading)
+    return (
+      <div className="text-center my-4">
+        <div className="spinner-border" role="status">
+          <span className="visually-hidden">Cargando...</span>
+        </div>
+      </div>
+    );
 
   return (
     <div className="container mt-4">
       <h2 className="mb-4">Empresas</h2>
-      <button className="btn btn-primary mb-3" onClick={abrirFormularioCrear}>
+      <button
+        className="btn btn-primary mb-3"
+        onClick={abrirFormularioCrear}
+        disabled={loading}
+      >
         Crear Nueva Empresa
       </button>
 
@@ -122,12 +153,14 @@ export default function Empresas() {
                     <button
                       className="btn btn-sm btn-warning me-2"
                       onClick={() => abrirFormularioEditar(empresa)}
+                      disabled={loading}
                     >
                       Editar
                     </button>
                     <button
                       className="btn btn-sm btn-danger"
                       onClick={() => handleEliminar(empresa.id)}
+                      disabled={loading}
                     >
                       Eliminar
                     </button>

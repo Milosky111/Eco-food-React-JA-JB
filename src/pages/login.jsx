@@ -7,7 +7,7 @@ import {
   signOut,
 } from "firebase/auth";
 import { auth } from "../services/firebase";
-import { getUserData } from "../services/userService";
+import { getUserDataByEmail } from "../services/userService"; // <-- Importa la función nueva
 import Swal from "sweetalert2";
 
 export default function Login() {
@@ -20,7 +20,7 @@ export default function Login() {
     try {
       await setPersistence(auth, browserLocalPersistence);
       const cred = await signInWithEmailAndPassword(auth, email, password);
-      await cred.user.reload(); // asegura obtener emailVerified actualizado
+      await cred.user.reload();
 
       if (!cred.user.emailVerified) {
         await signOut(auth);
@@ -31,7 +31,8 @@ export default function Login() {
         );
       }
 
-      const datos = await getUserData(cred.user.uid);
+      // Buscar datos en Firestore POR EMAIL, no por UID
+      const datos = await getUserDataByEmail(email);
       console.log("Datos del usuario:", datos);
 
       if (!datos || !datos.tipo) {
@@ -40,22 +41,51 @@ export default function Login() {
 
       Swal.fire("Bienvenido", "Has iniciado sesión correctamente", "success");
 
-      if (datos.tipo === "admin") navigate("/admin/dashboard");
-      else if (datos.tipo === "cliente") navigate("/cliente/dashboard");
-      else navigate("/home"); // fallback en caso de tipo desconocido
-
+      switch (datos.tipo) {
+        case "administradores":
+          navigate("/admin/dashboard");
+          break;
+        case "empresas":
+          navigate("/empresa/dashboard");
+          break;
+        case "cliente":
+          navigate("/cliente/dashboard");
+          break;
+        default:
+          Swal.fire("Error", "Rol de usuario no reconocido.", "error");
+          await signOut(auth);
+          break;
+      }
     } catch (error) {
-      console.error("Error al iniciar sesión:", error.message);
+      console.error("Error al iniciar sesión:", error);
 
-      Swal.fire(
-        "Error",
-        error.message.includes("user-not-found")
-          ? "Usuario no encontrado."
-          : error.message.includes("wrong-password")
-          ? "Contraseña incorrecta."
-          : error.message || "Credenciales incorrectas o fallo de red.",
-        "error"
-      );
+      let mensaje = "Ocurrió un error inesperado.";
+
+      switch (error.code) {
+        case "auth/invalid-email":
+          mensaje = "El correo electrónico no es válido.";
+          break;
+        case "auth/user-not-found":
+          mensaje = "No existe una cuenta con este correo.";
+          break;
+        case "auth/wrong-password":
+          mensaje = "La contraseña es incorrecta.";
+          break;
+        case "auth/user-disabled":
+          mensaje = "Esta cuenta ha sido deshabilitada.";
+          break;
+        case "auth/too-many-requests":
+          mensaje = "Demasiados intentos fallidos. Intenta más tarde.";
+          break;
+        case "auth/network-request-failed":
+          mensaje = "Fallo de red. Verifica tu conexión a internet.";
+          break;
+        default:
+          mensaje = error.message || mensaje;
+          break;
+      }
+
+      Swal.fire("Error al iniciar sesión", mensaje, "error");
     }
   };
 
@@ -94,7 +124,7 @@ export default function Login() {
       </Link>
       <p className="mt-3 text-center">
         ¿Olvidaste tu contraseña?{" "}
-        <Link to="/RecuperarContraseña" style={{ textDecoration: "underline" }}>
+        <Link to="/recuperar" style={{ textDecoration: "underline" }}>
           Restablecer aquí
         </Link>
       </p>
