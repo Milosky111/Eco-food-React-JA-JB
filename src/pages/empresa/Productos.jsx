@@ -3,8 +3,13 @@ import { useAuth } from "../../context/AuthContext";
 import Swal from "sweetalert2";
 
 import { deleteProducto } from "../../services/productoService";
+<<<<<<< HEAD
 import TablaProductos from "../../components/Empresas/TablaProductos";
 import ModalProductos from "../../components/Empresas/ModalProductos";
+=======
+import TablaProductos from "../../components/empresa/TablaProductos";
+import ModalProductos from "../../components/empresa/ModalProductos";
+>>>>>>> cb539dd4343851c0b39d6c5f5b283f01ffbf1435
 
 export default function Productos() {
   const { userData } = useAuth();
