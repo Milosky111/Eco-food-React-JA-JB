@@ -37,7 +37,7 @@ export const registrarAdminConAuth = async (datos) => {
     );
     await sendEmailVerification(cred.user);
 
-    // Guardar datos en Firestore con ID auto generado
+    // Guardar datos en Firestore con ID generado por Auth UID
     await addDoc(adminsCollection, {
       nombre: datos.nombre,
       email: datos.email,
@@ -59,11 +59,15 @@ export const registrarAdminConAuth = async (datos) => {
 export const updateAdministrador = async (id, datos) => {
   const adminRef = doc(db, "administradores", id);
 
-  await updateDoc(adminRef, {
+  const datosActualizar = {
     nombre: datos.nombre,
     email: datos.email,
     esPrincipal: datos.esPrincipal || false,
-  });
+  };
+
+  // No hay lógica para actualizar contraseña aquí, ya que requiere reautenticación y manejo aparte
+
+  await updateDoc(adminRef, datosActualizar);
 };
 
 // Eliminar administrador

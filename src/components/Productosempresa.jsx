@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getProductosPorEmpresa, addProducto, eliminarProducto } from "../services/productosfirebase";
+import { getProductosPorEmpresa, addProducto, deleteProducto } from "../services/productosfirebase"; 
 
 export default function ProductosPorEmpresa({ empresaId }) {
   const [productos, setProductos] = useState([]);
@@ -36,7 +36,7 @@ export default function ProductosPorEmpresa({ empresaId }) {
 
   const eliminar = async (id) => {
     try {
-      await eliminarProducto(id);
+      await deleteProducto(id); // ← función correcta
       cargarProductos();
     } catch (error) {
       console.error("Error eliminando producto:", error);
