@@ -17,7 +17,7 @@ import AdminAdministradores from "../pages/Admin/Administradores/administradores
 
 // Empresa
 import EmpresaDashboard from "../pages/empresa/EmpresaDashboard";
-import EmpresaProductos from "../pages/Empresa/Productos";
+import EmpresaProductos from "../pages/empresa/Productos";
 import EmpresaPerfil from "../pages/empresa/Empresaperfil";
 
 export default function AppRouter() {

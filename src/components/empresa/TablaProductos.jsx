@@ -60,19 +60,26 @@ export default function TablaProductos({ userData, busqueda, eliminar, abrirModa
 
     const cargarPagina = async () => {
       let cursor = null;
+
+      console.log("hola")
       if (pagina > 0) {
         cursor = historial[pagina - 1] || null;
       }
-
-      const { productos: nuevos, lastVisible } = await getProductosByEmpresaPagina(
-        userData.uid,
+ console.log(        userData.uid,
         cursor,
         busqueda,
         pageSize,
         ordenCampo,
+        ordenDireccion)
+      const { productos: nuevos, lastVisible } = await getProductosByEmpresaPagina(
+        userData.uid,
+        cursor,
+        "",
+        pageSize,
+        ordenCampo,
         ordenDireccion
       );
-
+ console.log("hola3")
       // Filtrar productos por estado
       let filtrados = nuevos;
       if (filtroEstado !== "todos") {
