@@ -17,8 +17,10 @@ TablaProductos.propTypes = {
 function calcularEstadoProducto(vencimiento) {
   if (!vencimiento) return "desconocido";
 
+  // Convertir Timestamp a Date si es objeto
+  const fechaVenc = vencimiento.toDate ? vencimiento.toDate() : new Date(vencimiento);
+
   const hoy = new Date();
-  const fechaVenc = new Date(vencimiento);
   const diffMs = fechaVenc - hoy;
   const diffDias = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
 
@@ -35,52 +37,44 @@ export default function TablaProductos({ userData, busqueda, eliminar, abrirModa
   const [sinMas, setSinMas] = useState(false);
 
   // Nuevos estados para filtros y ordenamiento
-  const [filtroEstado, setFiltroEstado] = useState("todos"); // "todos", "disponible", "por vencer", "vencido"
-  const [ordenCampo, setOrdenCampo] = useState("nombre"); // "nombre" o "precio"
-  const [ordenDireccion, setOrdenDireccion] = useState("asc"); // "asc" o "desc"
+  const [filtroEstado, setFiltroEstado] = useState("todos");
+  const [ordenCampo, setOrdenCampo] = useState("nombre");
+  const [ordenDireccion, setOrdenDireccion] = useState("asc");
   const [pageSize, setPageSize] = useState(PAGE_OPTIONS[0]);
 
-  // Obtener total de productos al montar o cambiar búsqueda, filtro o pageSize
   useEffect(() => {
     if (!userData) return;
 
     const fetchTotal = async () => {
       const cantidad = await obtenerTotalProductos(userData.uid, busqueda);
       setTotal(cantidad);
-      setPagina(0); // Resetear a página 0 cuando cambian filtros/búsqueda
+      setPagina(0);
       setHistorial([]);
     };
 
     fetchTotal();
   }, [userData, busqueda, filtroEstado, pageSize]);
 
-  // Obtener productos de una página
   useEffect(() => {
     if (!userData) return;
 
     const cargarPagina = async () => {
       let cursor = null;
 
-      console.log("hola")
       if (pagina > 0) {
         cursor = historial[pagina - 1] || null;
       }
- console.log(        userData.uid,
-        cursor,
-        busqueda,
-        pageSize,
-        ordenCampo,
-        ordenDireccion)
+
       const { productos: nuevos, lastVisible } = await getProductosByEmpresaPagina(
         userData.uid,
         cursor,
-        "",
-        pageSize,
+        busqueda,
+        filtroEstado,
         ordenCampo,
-        ordenDireccion
+        ordenDireccion,
+        pageSize
       );
- console.log("hola3")
-      // Filtrar productos por estado
+
       let filtrados = nuevos;
       if (filtroEstado !== "todos") {
         filtrados = nuevos.filter(
@@ -169,6 +163,14 @@ export default function TablaProductos({ userData, busqueda, eliminar, abrirModa
             )}
             {productos.map((p) => {
               const estado = calcularEstadoProducto(p.vencimiento);
+
+              // Obtener fecha legible
+              const fechaVencimiento = p.vencimiento
+                ? p.vencimiento.toDate
+                  ? p.vencimiento.toDate()
+                  : new Date(p.vencimiento)
+                : null;
+
               return (
                 <li
                   key={p.id}
@@ -182,7 +184,9 @@ export default function TablaProductos({ userData, busqueda, eliminar, abrirModa
                 >
                   <div>
                     <strong>{p.nombre}</strong>{" "}
-                    {p.precio === 0 && <span className="badge bg-success ms-2">Gratis</span>}
+                    {p.precio === 0 && (
+                      <span className="badge bg-success ms-2">Gratis</span>
+                    )}
                     <br />
                     <small>{p.descripcion}</small>
                     <br />
@@ -197,7 +201,9 @@ export default function TablaProductos({ userData, busqueda, eliminar, abrirModa
                             : ""
                         }
                       >
-                        {p.vencimiento || "Sin fecha"}
+                        {fechaVencimiento
+                          ? fechaVencimiento.toLocaleDateString()
+                          : "Sin fecha"}
                       </span>
                     </small>
                   </div>
