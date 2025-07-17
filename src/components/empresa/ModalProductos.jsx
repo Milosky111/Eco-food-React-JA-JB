@@ -39,6 +39,12 @@ export default function ModalProductos({
       return false;
     }
 
+    // 🔹 Validación: la fecha de vencimiento es obligatoria
+    if (!formData.vencimiento) {
+      setError("La fecha de vencimiento es obligatoria");
+      return false;
+    }
+
     if (formData.vencimiento) {
       const hoy = new Date();
       const fechaVenc = new Date(formData.vencimiento);
@@ -101,7 +107,7 @@ export default function ModalProductos({
   const manejarCambioCantidad = (e) => {
     const val = e.target.value;
     if (/^\d*$/.test(val)) {
-      setFormData({ ...formData, cantidad: val === "" ? 0 : parseInt(val) });
+      setFormData({ ...formData, cantidad: val === "" ? 0 : parseInt(val, 10) });
     }
   };
 
@@ -109,7 +115,7 @@ export default function ModalProductos({
     const val = e.target.value;
     // Permitir solo números enteros para precio (puedes modificar para decimales)
     if (/^\d*$/.test(val)) {
-      setFormData({ ...formData, precio: val === "" ? 0 : parseInt(val) });
+      setFormData({ ...formData, precio: val === "" ? 0 : parseInt(val, 10) });
     }
   };
 
@@ -217,7 +223,7 @@ export default function ModalProductos({
 
           <div className="mb-3">
             <label htmlFor="vencimiento" className="form-label">
-              Fecha de Vencimiento
+              Fecha de Vencimiento *
             </label>
             <input
               id="vencimiento"
@@ -227,25 +233,30 @@ export default function ModalProductos({
               onChange={(e) =>
                 setFormData({ ...formData, vencimiento: e.target.value })
               }
+              required
             />
-            {formData.vencimiento && (() => {
-              const hoy = new Date();
-              const venc = new Date(formData.vencimiento);
-              const diffTime = venc - hoy.setHours(0, 0, 0, 0);
-              const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-              if (diffDays <= 3 && diffDays >= 0) {
-                return (
-                  <small className="text-warning">
-                    ⚠️ Producto vence en {diffDays} día
-                    {diffDays > 1 ? "s" : ""}
-                  </small>
-                );
-              }
-              if (diffDays < 0) {
-                return <small className="text-danger">❌ Producto vencido</small>;
-              }
-              return null;
-            })()}
+            {formData.vencimiento &&
+              (() => {
+                const hoy = new Date();
+                const venc = new Date(formData.vencimiento);
+                hoy.setHours(0, 0, 0, 0);
+                const diffTime = venc - hoy;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                if (diffDays <= 3 && diffDays >= 0) {
+                  return (
+                    <small className="text-warning">
+                      ⚠️ Producto vence en {diffDays} día
+                      {diffDays > 1 ? "s" : ""}
+                    </small>
+                  );
+                }
+                if (diffDays < 0) {
+                  return (
+                    <small className="text-danger">❌ Producto vencido</small>
+                  );
+                }
+                return null;
+              })()}
           </div>
 
           <div className="mb-3">
@@ -268,6 +279,7 @@ export default function ModalProductos({
               ))}
             </select>
           </div>
+
           {error && <div className="alert alert-danger">{error}</div>}
         </Modal.Body>
         <Modal.Footer>
