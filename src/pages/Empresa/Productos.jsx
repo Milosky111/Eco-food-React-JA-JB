@@ -1,18 +1,17 @@
 import { useState, useCallback } from "react";
 import { useAuth } from "../../context/AuthContext";
 import Swal from "sweetalert2";
-import { deleteProducto } from "../../services/productoService";
 
-import TablaProductos from '../../components/empresa/TablaProductos';
-import ModalProductos from '../../components/empresa/ModalProductos';
+import { eliminarProducto } from "../../services/productoService";
+import TablaProductos from "../../components/empresa/TablaProductos";
+import ModalProductos from "../../components/empresa/ModalProductos";
 
 export default function Productos() {
   const { userData } = useAuth();
 
   const [busqueda, setBusqueda] = useState("");
-  const [refreshTick, setRefreshTick] = useState(0); // Para refetch después de borrar
+  const [refreshTick, setRefreshTick] = useState(0); // para refetch después de borrar
   const [showModal, setShowModal] = useState(false);
-
   const [formData, setFormData] = useState({
     nombre: "",
     descripcion: "",
@@ -30,17 +29,18 @@ export default function Productos() {
       const confirm = await Swal.fire({
         title: "¿Eliminar producto?",
         showCancelButton: true,
+        confirmButtonText: "Eliminar",
+        cancelButtonText: "Cancelar",
+        icon: "warning",
       });
 
       if (confirm.isConfirmed) {
-        await deleteProducto(id);
+        await eliminarProducto(id);
         handleRefresh();
-      } else {
-        return;
       }
     } catch (e) {
       console.error(e);
-      alert('Error al eliminar'); // Manejo simple; mejora a tu gusto
+      Swal.fire("Error", "No se pudo eliminar el producto", "error");
     }
   }, []);
 
@@ -56,7 +56,6 @@ export default function Productos() {
         id: null,
       });
     }
-
     setShowModal(true);
   };
 
@@ -80,7 +79,7 @@ export default function Productos() {
             <div
               className="btn-group"
               role="group"
-              aria-label="Buscar y refrescar"
+              aria-label="Buscar producto"
               style={{ width: "100%" }}
             >
               <input
@@ -90,7 +89,10 @@ export default function Productos() {
                 value={busqueda}
                 onChange={(e) => setBusqueda(e.target.value)}
               />
-              <button className="btn btn-outline-success" onClick={handleRefresh}>
+              <button
+                className="btn btn-outline-success"
+                onClick={handleRefresh}
+              >
                 <i className="fa-solid fa-arrows-rotate"></i>
               </button>
             </div>
